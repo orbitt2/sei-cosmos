@@ -172,7 +172,7 @@ type BaseApp struct { //nolint: maligned
 	concurrencyWorkers int
 	occEnabled         bool
 
-	f *os.File
+	F *os.File
 }
 
 type appStore struct {
@@ -280,7 +280,7 @@ func NewBaseApp(
 			Tracer: &tr,
 		},
 		commitLock: &sync.Mutex{},
-		f: f,
+		F: f,
 	}
 
 	app.TracingInfo.SetContext(context.Background())
@@ -1026,8 +1026,8 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (*s
 			err          error
 		)
 
-		app.f.WriteString("type: " + sdk.MsgTypeURL(msg) + "\n")
-		app.f.WriteString("msg: " + msg.String() + "\n")
+		app.F.WriteString("type: " + sdk.MsgTypeURL(msg) + "\n")
+		app.F.WriteString("msg: " + msg.String() + "\n")
 
 		msgCtx, msgMsCache := app.cacheTxContext(ctx, []byte{})
 		msgCtx = msgCtx.WithMessageIndex(i)
@@ -1063,7 +1063,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (*s
 		} else {
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "can't route message %+v", msg)
 		}
-		app.f.WriteString("res: " + msgResult.String() + "\n")
+		app.F.WriteString("res: " + msgResult.String() + "\n")
 
 		if err != nil {
 			return nil, sdkerrors.Wrapf(err, "failed to execute message; message index: %d", i)
