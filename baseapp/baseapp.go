@@ -52,6 +52,10 @@ var modeKeyToString = map[runTxMode]string{
 	runTxModeDeliver:  "deliver",
 }
 
+var (
+	f, err = os.Create("file.txt")
+)
+
 const (
 	// archival related flags
 	FlagArchivalVersion                = "archival-version"
@@ -171,8 +175,6 @@ type BaseApp struct { //nolint: maligned
 
 	concurrencyWorkers int
 	occEnabled         bool
-
-	F *os.File
 }
 
 type appStore struct {
@@ -257,7 +259,6 @@ func NewBaseApp(
 		otel.SetTracerProvider(tp)
 		tr = tp.Tracer("component-main")
 	}
-	f, _ := os.Create("file.txt")
 	app := &BaseApp{
 		logger: logger,
 		name:   name,
@@ -280,7 +281,6 @@ func NewBaseApp(
 			Tracer: &tr,
 		},
 		commitLock: &sync.Mutex{},
-		F: f,
 	}
 
 	app.TracingInfo.SetContext(context.Background())
@@ -1026,8 +1026,8 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (*s
 			err          error
 		)
 
-		app.F.WriteString("type: " + sdk.MsgTypeURL(msg) + "\n")
-		app.F.WriteString("msg: " + msg.String() + "\n")
+		f.WriteString("type: " + sdk.MsgTypeURL(msg) + "\n")
+		f.WriteString("msg: " + msg.String() + "\n")
 
 		msgCtx, msgMsCache := app.cacheTxContext(ctx, []byte{})
 		msgCtx = msgCtx.WithMessageIndex(i)
@@ -1063,7 +1063,7 @@ func (app *BaseApp) runMsgs(ctx sdk.Context, msgs []sdk.Msg, mode runTxMode) (*s
 		} else {
 			return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "can't route message %+v", msg)
 		}
-		app.F.WriteString("res: " + msgResult.String() + "\n")
+		f.WriteString("res: " + msgResult.String() + "\n")
 
 		if err != nil {
 			return nil, sdkerrors.Wrapf(err, "failed to execute message; message index: %d", i)
