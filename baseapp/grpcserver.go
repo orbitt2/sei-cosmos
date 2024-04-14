@@ -2,6 +2,7 @@ package baseapp
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 
 	gogogrpc "github.com/gogo/protobuf/grpc"
@@ -92,6 +93,9 @@ func (app *BaseApp) RegisterGRPCServer(server gogogrpc.Server) {
 			Streams:     desc.Streams,
 			Metadata:    desc.Metadata,
 		}
+		fmt.Println("***************************************************************************************************")
+		fmt.Println(data.handler)
+		fmt.Println("***************************************************************************************************")
 
 		server.RegisterService(newDesc, data.handler)
 	}
